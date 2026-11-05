@@ -4,8 +4,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Premium Backend API"
     API_V1_STR: str = "/api/v1"
     
-    # URL de conexión por defecto a PostgreSQL (ajustala con tus credenciales locales o vía .env)
-    DATABASE_URL: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/backend_db"
+    # Esta línea leerá automáticamente el DATABASE_URL del archivo .env
+    DATABASE_URL: str
+
     class Config:
         env_file = ".env"
 
