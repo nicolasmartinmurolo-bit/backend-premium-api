@@ -45,3 +45,13 @@ def get_current_user(
         raise HTTPException(status_code=400, detail="Inactive user")
         
     return user
+
+def get_current_active_superuser(
+    current_user: UserModel = Depends(get_current_user),
+) -> UserModel:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, 
+            detail="El usuario no cuenta con privilegios de administrador."
+        )
+    return current_user

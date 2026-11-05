@@ -5,6 +5,7 @@ class UserBase(BaseModel):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     is_active: Optional[bool] = True
+    is_superuser: Optional[bool] = False  # <-- Nuevo campo en los esquemas
 
 class UserCreate(UserBase):
     email: EmailStr
