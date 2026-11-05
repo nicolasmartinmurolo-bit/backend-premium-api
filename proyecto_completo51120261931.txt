@@ -1,0 +1,1400 @@
+
+
+================================================================================
+ARCHIVO: .\.env
+================================================================================
+
+PROJECT_NAME="Premium Backend API"
+DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5432/backend_db"
+
+SECRET_KEY="tu_super_secret_key_ultrasecured_change_it_in_production"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+================================================================================
+ARCHIVO: .\alembic.ini
+================================================================================
+
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts.
+# this is typically a path given in POSIX (e.g. forward slashes)
+# format, relative to the token %(here)s which refers to the location of this
+# ini file
+script_location = %(here)s/alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# see https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
+# for all available tokens
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+# Or organize into date-based subdirectories (requires recursive_version_locations = true)
+# file_template = %%(year)d/%%(month).2d/%%(day).2d_%%(hour).2d%%(minute).2d_%%(second).2d_%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.  for multiple paths, the path separator
+# is defined by "path_separator" below.
+prepend_sys_path = .
+
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the tzdata library which can be installed by adding
+# `alembic[tz]` to the pip requirements.
+# string value is passed to ZoneInfo()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version location specification; This defaults
+# to <script_location>/versions.  When using multiple version
+# directories, initial revisions must be specified with --version-path.
+# The path separator used here should be the separator specified by "path_separator"
+# below.
+# version_locations = %(here)s/bar:%(here)s/bat:%(here)s/alembic/versions
+
+# path_separator; This indicates what character is used to split lists of file
+# paths, including version_locations and prepend_sys_path within configparser
+# files such as alembic.ini.
+# The default rendered in new alembic.ini files is "os", which uses os.pathsep
+# to provide os-dependent path splitting.
+#
+# Note that in order to support legacy alembic.ini files, this default does NOT
+# take place if path_separator is not present in alembic.ini.  If this
+# option is omitted entirely, fallback logic is as follows:
+#
+# 1. Parsing of the version_locations option falls back to using the legacy
+#    "version_path_separator" key, which if absent then falls back to the legacy
+#    behavior of splitting on spaces and/or commas.
+# 2. Parsing of the prepend_sys_path option falls back to the legacy
+#    behavior of splitting on spaces, commas, or colons.
+#
+# Valid values for path_separator are:
+#
+# path_separator = :
+# path_separator = ;
+# path_separator = space
+# path_separator = newline
+#
+# Use os.pathsep. Default configuration used for new projects.
+path_separator = os
+
+# set to 'true' to search source files recursively
+# in each "version_locations" directory
+# new in Alembic version 1.10
+# recursive_version_locations = false
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+# database URL.  This is consumed by the user-maintained env.py script only.
+# other means of configuring database URLs may be customized within the env.py
+# file.
+sqlalchemy.url = postgresql+psycopg2://postgres:postgres@localhost:5432/backend_db
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the module runner, against the "ruff" module
+# hooks = ruff
+# ruff.type = module
+# ruff.module = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Alternatively, use the exec runner to execute a binary found on your PATH
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration.  This is also consumed by the user-maintained
+# env.py script only.
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARNING
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARNING
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+
+
+================================================================================
+ARCHIVO: .\export_project.py
+================================================================================
+
+import os
+
+OUTPUT_FILE = "proyecto_completo.txt"
+VALID_EXTENSIONS = (".py", ".env", ".ini", ".md", ".json", ".txt")
+EXCLUDE_DIRS = {".venv", "__pycache__", ".git", ".pytest_cache", "alembic/versions"}
+
+def export_project():
+    print("Iniciando empaquetado del proyecto...")
+    count = 0
+    with open(OUTPUT_FILE, "w", encoding="utf-8", errors="ignore") as outfile:
+        for root, dirs, files in os.walk("."):
+            # Excluimos carpetas no deseadas modificando dirs in-place
+            dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+            
+            for file in files:
+                if file.endswith(VALID_EXTENSIONS) and file != OUTPUT_FILE:
+                    file_path = os.path.join(root, file)
+                    print(f"Procesando: {file_path}")
+                    
+                    outfile.write(f"\n\n{'='*80}\n")
+                    outfile.write(f"ARCHIVO: {file_path}\n")
+                    outfile.write(f"{'='*80}\n\n")
+                    
+                    try:
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as infile:
+                            outfile.write(infile.read())
+                        count += 1
+                    except Exception as e:
+                        outfile.write(f"[Error al leer el archivo: {e}]\n")
+                        
+    print(f"\n¡Éxito total! Se empaquetaron {count} archivos en: {OUTPUT_FILE}")
+
+if __name__ == "__main__":
+    export_project()
+
+================================================================================
+ARCHIVO: .\README.md
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\requirements.txt
+================================================================================
+
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.4
+pydantic-settings>=2.2.1
+sqlalchemy>=2.0.27
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.9
+python-jose[cryptography]>=3.3.0
+
+================================================================================
+ARCHIVO: .\alembic\env.py
+================================================================================
+
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
+from alembic import context
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+# Importa la Base y tus modelos al inicio de alembic/env.py
+from app.core.database import Base
+from app.models.user import User  # Importamos todos los modelos para que Alembic los detecte
+
+# Reemplaza target_metadata = None por:
+target_metadata = Base.metadata
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+
+================================================================================
+ARCHIVO: .\alembic\versions\3cf0d9b05127_add_is_superuser_column.py
+================================================================================
+
+"""add is_superuser column
+
+Revision ID: 3cf0d9b05127
+Revises: c7a4a60cd3d7
+Create Date: 2026-11-05 16:51:26.548878
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '3cf0d9b05127'
+down_revision: Union[str, Sequence[str], None] = 'c7a4a60cd3d7'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('users', sa.Column('is_superuser', sa.Boolean(), nullable=True))
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_column('users', 'is_superuser')
+    # ### end Alembic commands ###
+
+
+================================================================================
+ARCHIVO: .\alembic\versions\a62fb7ddd09a_add_full_name_to_user_model.py
+================================================================================
+
+"""add full_name to user model
+
+Revision ID: a62fb7ddd09a
+Revises: d768ed660743
+Create Date: 2026-11-05 02:32:47.947866
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'a62fb7ddd09a'
+down_revision: Union[str, Sequence[str], None] = 'd768ed660743'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+
+================================================================================
+ARCHIVO: .\alembic\versions\c7a4a60cd3d7_add_is_superuser_to_user_model.py
+================================================================================
+
+"""add is_superuser to user model
+
+Revision ID: c7a4a60cd3d7
+Revises: a62fb7ddd09a
+Create Date: 2026-11-05 15:49:43.039422
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'c7a4a60cd3d7'
+down_revision: Union[str, Sequence[str], None] = 'a62fb7ddd09a'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+
+================================================================================
+ARCHIVO: .\alembic\versions\d768ed660743_create_users_table.py
+================================================================================
+
+"""create users table
+
+Revision ID: d768ed660743
+Revises: 
+Create Date: 2026-11-05 02:02:14.752756
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'd768ed660743'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.Column('hashed_password', sa.String(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_users_id'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
+    # ### end Alembic commands ###
+
+
+================================================================================
+ARCHIVO: .\app\main.py
+================================================================================
+
+"""
+Punto de Entrada Principal de la Aplicación (FastAPI Server Entrypoint).
+--------------------------------------------------------------------------------
+Este archivo es lo primero que lee el servidor (Uvicorn) al arrancar la aplicación.
+Sus responsabilidades principales son:
+1. Instanciar el objeto principal de FastAPI utilizando los metadatos globales.
+2. Configurar la ruta base de la documentación interactiva (Swagger UI).
+3. Montar y registrar el enrutador general de la API (api_router) que agrupa 
+   todos los sub-módulos (usuarios, autenticación, etc.).
+4. Exponer una ruta raíz (health check / root) para verificar que el servicio responde.
+"""
+
+from fastapi import FastAPI
+from app.core.config import settings
+from app.api.v1.api import api_router
+
+# -------------------------------------------------------------------------
+# 1. Instanciación y Configuración del Servidor FastAPI
+# -------------------------------------------------------------------------
+# Creamos la aplicación principal. 
+# - title: Extrae el nombre del proyecto desde las configuraciones globales.
+# - openapi_url: Define la ruta donde se genera el esquema JSON de la API 
+#   para alimentar de forma dinámica la interfaz interactiva de Swagger UI.
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+)
+
+# -------------------------------------------------------------------------
+# 2. Montaje del Enrutador General de la API (Versionado)
+# -------------------------------------------------------------------------
+# Conectamos el enrutador central de la versión 1 (api_router) aplicando 
+# el prefijo global (ej. /api/v1). 
+# Gracias a esto, cualquier sub-ruta (como /users o /login) heredará automáticamente 
+# dicho prefijo sin necesidad de modificar el main.
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+# -------------------------------------------------------------------------
+# 3. Ruta Raíz / Verificación de Estado (Health Check)
+# -------------------------------------------------------------------------
+@app.get("/")
+def root():
+    """
+    Endpoint raíz de bienvenida.
+    Permite comprobar rápidamente que el servidor Uvicorn está activo y funcionando, 
+    guiando al desarrollador hacia la documentación interactiva en /docs.
+    """
+    return {
+        "message": "Welcome to the Premium Backend API. Go to /docs for Swagger documentation."
+    }
+
+================================================================================
+ARCHIVO: .\app\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\api\deps.py
+================================================================================
+
+"""
+Módulo de Inyección de Dependencias y Seguridad (Autenticación y Roles).
+--------------------------------------------------------------------------------
+Este archivo agrupa las funciones de dependencia fundamentales utilizadas 
+para proteger los endpoints de la API:
+1. Configuración del esquema OAuth2 para la extracción de tokens Bearer.
+2. Validador de identidad mediante tokens JWT (get_current_user).
+3. Validador de privilegios de administrador / superusuario (get_current_active_superuser).
+"""
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.core.database import get_db  # <--- Importamos la única fuente oficial de get_db
+from app.models.user import User as UserModel
+from app.schemas.token import TokenData
+
+# -------------------------------------------------------------------------
+# 1. Esquema de Seguridad OAuth2 (Token Bearer)
+# -------------------------------------------------------------------------
+# OAuth2PasswordBearer le indica a FastAPI dónde debe buscar el token en las 
+# peticiones entrantes. Apunta directamente a la ruta de login (/api/v1/login/access-token)
+# para que Swagger UI sepa cómo y dónde autenticarse automáticamente.
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+)
+
+
+# -------------------------------------------------------------------------
+# 2. Dependencia de Usuario Actual (Autenticación por JWT)
+# -------------------------------------------------------------------------
+def get_current_user(
+    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+) -> UserModel:
+    """
+    Intercepta la petición HTTP, extrae y valida el token JWT recibido en los headers.
+    Retorna el objeto del usuario autenticado si el token es válido y el usuario existe.
+    Lanza una excepción HTTP 401 (Unauthorized) si algo falla.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        # Decodificamos el token usando la clave secreta y el algoritmo global
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        email: str = payload.get("sub")  # 'sub' (subject) almacena el email del usuario
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        # Si el token expiró, fue alterado o es inválido, explota aquí
+        raise credentials_exception
+        
+    # Buscamos al usuario en la base de datos PostgreSQL mediante su email
+    user = db.query(UserModel).filter(UserModel.email == token_data.email).first()
+    if user is None:
+        raise credentials_exception
+        
+    # Validamos adicionalmente que la cuenta del usuario se encuentre activa
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+        
+    return user
+
+
+# -------------------------------------------------------------------------
+# 3. Dependencia de Control de Acceso por Roles (Superusuario)
+# -------------------------------------------------------------------------
+def get_current_active_superuser(
+    current_user: UserModel = Depends(get_current_user),
+) -> UserModel:
+    """
+    Capa de autorización superior. Toma al usuario ya autenticado (gracias a get_current_user) 
+    y evalúa si cuenta con privilegios de administrador (is_superuser = True).
+    Si no es administrador, bloquea el acceso lanzando un error HTTP 403 (Forbidden).
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="El usuario no cuenta con privilegios de administrador."
+        )
+    return current_user
+
+================================================================================
+ARCHIVO: .\app\api\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\api\v1\api.py
+================================================================================
+
+"""
+Enrutador Central de la Versión 1 de la API (API Router).
+--------------------------------------------------------------------------------
+Este archivo implementa el patrón de diseño de enrutamiento modular. 
+Su propósito es centralizar y agrupar todos los sub-routers específicos del 
+sistema (como gestión de usuarios, autenticación, etc.) bajo un único enrutador 
+general (`api_router`). Esto evita saturar el archivo principal (`main.py`) 
+con múltiples importaciones y facilita la escalabilidad limpia del proyecto.
+"""
+
+from fastapi import APIRouter
+from app.api.v1.endpoints import users, auth
+
+# -------------------------------------------------------------------------
+# 1. Instanciación del Enrutador Central de Versión
+# -------------------------------------------------------------------------
+# Creamos el objeto APIRouter general para esta versión de la API (v1).
+api_router = APIRouter()
+
+
+# -------------------------------------------------------------------------
+# 2. Registro e Inclusión de Sub-Routers Modulares
+# -------------------------------------------------------------------------
+
+# Incluimos el router del módulo de usuarios:
+# - prefix="/users": Todas las rutas definidas en 'users.py' colgarán de este prefijo (ej: /users/).
+# - tags=["users"]: Agrupa visualmente estos endpoints bajo la sección "users" en Swagger UI.
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+
+# Incluimos el router del módulo de autenticación (login):
+# - No requiere un prefijo adicional ya que sus rutas (como /login/access-token) se definen de forma explícita.
+# - tags=["login"]: Organiza el bloque de inicio de sesión bajo la etiqueta correspondiente en la documentación.
+api_router.include_router(auth.router, tags=["login"])
+
+================================================================================
+ARCHIVO: .\app\api\v1\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\api\v1\endpoints\auth.py
+================================================================================
+
+"""
+Endpoints de Autenticación y Login (OAuth2).
+--------------------------------------------------------------------------------
+Este módulo expone las rutas públicas relacionadas con la acreditación de identidad. 
+Su función principal es recibir las credenciales del usuario (correo y contraseña), 
+verificar su autenticidad contra la base de datos y emitir un token JWT cifrado 
+que servirá como pase de acceso para las rutas protegidas de la API.
+"""
+
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+
+from app.core.database import SessionLocal
+from app.core.config import settings
+from app.core.security import verify_password, create_access_token
+from app.models.user import User as UserModel
+from app.schemas.token import Token
+
+# -------------------------------------------------------------------------
+# 1. Definición del Enrutador (Router)
+# -------------------------------------------------------------------------
+# Instanciamos APIRouter para agrupar todas las rutas de autenticación 
+# y permitir que el enrutador principal (api_router) las registre de forma modular.
+router = APIRouter()
+
+def get_db():
+    """
+    Dependencia local para abrir y cerrar sesiones de base de datos 
+    durante el proceso de autenticación.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# -------------------------------------------------------------------------
+# 2. Endpoint de Autenticación y Emisión de Tokens (Login)
+# -------------------------------------------------------------------------
+@router.post("/login/access-token", response_model=Token)
+def login_access_token(
+    db: Session = Depends(get_db), 
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
+    """
+    Endpoint compatible con OAuth2 para el inicio de sesión.
+    - Recibe un formulario estándar (OAuth2PasswordRequestForm) donde el campo 
+      'username' corresponde al correo electrónico del usuario y 'password' a su clave.
+    - Retorna un token de acceso cifrado (JWT) junto con su tipo (bearer).
+    """
+    
+    # Paso 1: Buscar al usuario en PostgreSQL utilizando su correo electrónico.
+    # Nota: OAuth2PasswordRequestForm almacena el identificador en la propiedad 'username'.
+    user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
+    
+    # Paso 2: Verificar la existencia del usuario y la validez de la contraseña.
+    # Comparamos la contraseña en texto plano con el hash seguro guardado usando bcrypt.
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
+        )
+    
+    # Paso 3: Validar que el estado de la cuenta del usuario se encuentre activo.
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user",
+        )
+    
+    # Paso 4: Configurar el tiempo de vida útil del token de acceso 
+    # utilizando los parámetros globales definidos en el archivo .env y config.py.
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Paso 5: Generar y retornar el token JWT incluyendo el email como identificador (subject 'sub').
+    return {
+        "access_token": create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
+
+================================================================================
+ARCHIVO: .\app\api\v1\endpoints\users.py
+================================================================================
+
+"""
+Endpoints de Gestión de Usuarios (CRUD y Perfil).
+--------------------------------------------------------------------------------
+Este módulo concentra las rutas HTTP destinadas a la administración de usuarios:
+1. Registro de nuevos usuarios (POST /) con cifrado automático de contraseñas.
+2. Listado general de usuarios (GET /) protegido exclusivamente para administradores.
+3. Consulta de perfil propio (GET /me) validando la identidad mediante el token JWT.
+"""
+
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db  # Dependencia centralizada de sesión de base de datos
+from app.core.security import get_password_hash
+from app.models.user import User as UserModel
+from app.schemas.user import User, UserCreate
+from app.api.deps import get_current_user, get_current_active_superuser
+
+# -------------------------------------------------------------------------
+# 1. Definición del Enrutador de Usuarios
+# -------------------------------------------------------------------------
+router = APIRouter()
+
+
+# -------------------------------------------------------------------------
+# 2. Endpoint de Registro de Usuarios (Create / POST)
+# -------------------------------------------------------------------------
+@router.post("/", response_model=User)
+def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
+    """
+    Registra un nuevo usuario en la base de datos:
+    - Valida que el correo electrónico no esté previamente registrado.
+    - Toma la contraseña en texto plano y genera su hash seguro con bcrypt.
+    - Almacena el registro en PostgreSQL de forma transaccional (commit/rollback).
+    """
+    
+    # Paso 1: Verificamos si ya existe un usuario con el mismo email en la base de datos.
+    existing_user = db.query(UserModel).filter(UserModel.email == user_in.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="El correo electrónico ya está registrado en la base de datos."
+        )
+    
+    # Paso 2: Creamos una instancia del modelo ORM User con los datos validados por Pydantic.
+    # Nota clave: La contraseña NUNCA se guarda en texto plano; se usa get_password_hash().
+    db_user = UserModel(
+        email=user_in.email,
+        hashed_password=get_password_hash(user_in.password),
+        full_name=user_in.full_name,
+        is_active=user_in.is_active,
+        is_superuser=user_in.is_superuser
+    )
+    
+    # Paso 3: Intentamos guardar los cambios en la base de datos de forma segura (Transacción).
+    try:
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)  # Actualiza la instancia con el ID generado automáticamente por la BD.
+        return db_user
+    except Exception as e:
+        # Si ocurre cualquier fallo inesperado, revertimos la transacción para no corromper la BD.
+        db.rollback()
+        print(f"ERROR REAL EN BD: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error: {str(e)}")
+
+
+# -------------------------------------------------------------------------
+# 3. Endpoint de Listado de Usuarios (Read / GET Protegido para Admins)
+# -------------------------------------------------------------------------
+@router.get("/", response_model=List[User])
+def read_users(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_active_superuser) # Capa de seguridad: Solo Admins
+):
+    """
+    Retorna una lista paginada de todos los usuarios registrados.
+    - Utiliza 'skip' y 'limit' para implementar paginación eficiente.
+    - Requiere obligatoriamente que el usuario que hace la petición tenga el rol 
+      de superusuario (is_superuser = True), validado mediante la dependencia de seguridad.
+    """
+    users = db.query(UserModel).offset(skip).limit(limit).all()
+    return users
+
+
+# -------------------------------------------------------------------------
+# 4. Endpoint de Consulta de Perfil Propio (Read / GET /me)
+# -------------------------------------------------------------------------
+@router.get("/me", response_model=User)
+def read_users_me(current_user: UserModel = Depends(get_current_user)):
+    """
+    Obtiene los datos del usuario actual autenticado mediante el token JWT.
+    - La dependencia 'get_current_user' intercepta el token Bearer, verifica su validez 
+      y extrae automáticamente el objeto usuario correspondiente de la base de datos.
+    """
+    return current_user
+
+================================================================================
+ARCHIVO: .\app\core\config.py
+================================================================================
+
+"""
+Módulo de Configuración Global del Proyecto.
+--------------------------------------------------------------------------------
+Este archivo utiliza Pydantic Settings para centralizar, tipar y validar todas 
+las variables de entorno de la aplicación. Actúa como la "única fuente de la 
+verdad" para los parámetros globales (como nombres de la API, prefijos y 
+credenciales de base de datos o seguridad).
+"""
+
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    """
+    Clase de configuración principal heredada de BaseSettings.
+    Pydantic lee automáticamente los atributos definidos aquí y busca sus 
+    valores correspondientes en el archivo .env o en las variables de entorno del sistema.
+    """
+    
+    # -------------------------------------------------------------------------
+    # 1. Metadatos Generales de la API
+    # -------------------------------------------------------------------------
+    PROJECT_NAME: str = "Premium Backend API"
+    API_V1_STR: str = "/api/v1"
+    
+    # -------------------------------------------------------------------------
+    # 2. Credenciales y Configuración de Base de Datos
+    # -------------------------------------------------------------------------
+    # Al no tener un valor por defecto asignado, Pydantic exigirá obligatoriamente 
+    # que esta variable esté presente en el archivo .env, lanzando un error si falta.
+    DATABASE_URL: str
+
+    # -------------------------------------------------------------------------
+    # 3. Configuración de Seguridad y Autenticación (JWT)
+    # -------------------------------------------------------------------------
+    SECRET_KEY: str                    # Llave criptográfica para firmar los tokens JWT.
+    ALGORITHM: str                     # Algoritmo de encriptación simétrica (ej. HS256).
+    ACCESS_TOKEN_EXPIRE_MINUTES: int   # Tiempo de vida útil del token antes de expirar.
+
+    # -------------------------------------------------------------------------
+    # 4. Configuración Interna de Pydantic (Clase Config)
+    # -------------------------------------------------------------------------
+    class Config:
+        """
+        Configuraciones de comportamiento para Pydantic.
+        'env_file' le indica explícitamente que debe buscar y cargar las 
+        variables desde el archivo local llamado '.env' ubicado en la raíz.
+        """
+        env_file = ".env"
+        env_file_encoding = "utf-8"  # Asegura soporte correcto para acentos y caracteres especiales.
+
+
+# Instancia global de configuración.
+# Al importar 'settings' desde cualquier otro archivo de la aplicación, 
+# ya tendremos disponibles todas las variables validadas y listas para usar.
+settings = Settings()
+
+================================================================================
+ARCHIVO: .\app\core\database.py
+================================================================================
+
+"""
+Módulo de Conexión y Gestión de Base de Datos (SQLAlchemy).
+--------------------------------------------------------------------------------
+Este archivo se encarga de establecer la comunicación con la base de datos 
+relacional (PostgreSQL), configurar el motor de ejecución (Engine), crear la 
+fábrica de sesiones (SessionLocal) y proveer la función de inyección de 
+dependencias para manejar el ciclo de vida de las sesiones en cada petición HTTP.
+"""
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+from app.core.config import settings
+
+# -------------------------------------------------------------------------
+# 1. Normalización y Validación de la URL de Conexión
+# -------------------------------------------------------------------------
+# Obtenemos la URL de la base de datos desde las configuraciones globales.
+db_url = settings.DATABASE_URL
+
+# Validación de seguridad defensiva: si la URL utiliza el prefijo genérico 
+# 'postgresql://' pero no especifica explícitamente el driver de psycopg2, 
+# se realiza un reemplazo automático para evitar errores de compatibilidad con SQLAlchemy.
+if "postgresql://" in db_url and "psycopg2" not in db_url:
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://")
+
+# -------------------------------------------------------------------------
+# 2. Creación del Motor de Base de Datos (Engine)
+# -------------------------------------------------------------------------
+try:
+    # create_engine es el punto central de conexión de SQLAlchemy.
+    # 'connect_args' se utiliza para pasar parámetros específicos del driver a nivel 
+    # de conexión en bruto, como un tiempo límite (timeout) de 5 segundos para evitar 
+    # que el servidor se quede bloqueado indefinidamente si la base de datos no responde.
+    engine = create_engine(
+        db_url,
+        connect_args={"connect_timeout": 5}
+    )
+    print("LOG: Motor de Base de Datos configurado correctamente.")
+except Exception as e:
+    # Capturamos cualquier error crítico al intentar inicializar el motor y lo relanzamos 
+    # para detener el inicio de la aplicación si no hay acceso a los datos.
+    print(f"LOG ERROR: Falló la creación del motor de BD: {e}")
+    raise e
+
+# -------------------------------------------------------------------------
+# 3. Configuración de Sesiones y Modelos ORM
+# -------------------------------------------------------------------------
+
+# Fábrica de sesiones (SessionLocal):
+# Cada instancia de SessionLocal representará una "sesión de trabajo" temporal 
+# con la base de datos. Desactivamos autocommit y autoflush para mantener un 
+# control manual y transaccional estricto de los cambios (commits y rollbacks).
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Base declarativa:
+# Clase constructora de la cual heredarán todos nuestros modelos ORM (como User).
+# Permite mapear clases de Python directamente a tablas relacionales en la base de datos.
+Base = declarative_base()
+
+# -------------------------------------------------------------------------
+# 4. Inyección de Dependencias (Ciclo de Vida de la Sesión)
+# -------------------------------------------------------------------------
+def get_db():
+    """
+    Dependencia global generadora (Generator).
+    Se encarga de abrir una nueva sesión de base de datos para cada petición HTTP 
+    que la requiera, entregándola mediante 'yield', y garantizando su cierre 
+    automático en el bloque 'finally' (incluso si ocurren errores durante la ejecución).
+    Esto previene fugas de memoria y conexiones colgadas en el servidor.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+================================================================================
+ARCHIVO: .\app\core\security.py
+================================================================================
+
+"""
+Módulo de Seguridad, Cifrado y Autenticación por Tokens (Bcrypt y JWT).
+--------------------------------------------------------------------------------
+Este archivo concentra toda la lógica criptográfica de la aplicación:
+1. El hashing unidireccional de contraseñas utilizando la librería 'bcrypt' 
+   de forma directa (evitando conflictos de compatibilidad).
+2. La generación, firma y validación de tokens digitales (JSON Web Tokens - JWT) 
+   utilizados para implementar una autenticación sin estado (stateless).
+"""
+
+import bcrypt
+from datetime import datetime, timedelta
+from typing import Optional
+from jose import jwt
+from app.core.config import settings
+
+# -------------------------------------------------------------------------
+# 1. Funciones de Hashing y Verificación de Contraseñas (Bcrypt)
+# -------------------------------------------------------------------------
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verifica si una contraseña en texto plano ingresada por el usuario 
+    coincide con el hash seguro almacenado en la base de datos.
+    Retorna True si son idénticas o False en caso contrario.
+    """
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'), 
+        hashed_password.encode('utf-8')
+    )
+
+def get_password_hash(password: str) -> str:
+    """
+    Genera un hash criptográfico irreversible de la contraseña utilizando bcrypt.
+    
+    Nota de seguridad: Bcrypt tiene una limitación nativa de 72 bytes máximos.
+    Por ello, convertimos el texto a bytes y aplicamos un corte preventivo a los 
+    primeros 72 bytes si la contraseña es excesivamente larga, evitando errores de sistema.
+    """
+    pwd_bytes = password.encode('utf-8')
+    if len(pwd_bytes) > 72:
+        pwd_bytes = pwd_bytes[:72]
+        
+    # Generamos la semilla aleatoria (salt) y aplicamos el hash con bcrypt
+    hashed = bcrypt.hashpw(pwd_bytes, bcrypt.gensalt())
+    return hashed.decode('utf-8')
+
+
+# -------------------------------------------------------------------------
+# 2. Generación de Tokens de Acceso (JSON Web Tokens - JWT)
+# -------------------------------------------------------------------------
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Genera un token JWT firmado digitalmente para autenticar al usuario en peticiones futuras.
+    
+    Parámetros:
+    - data: Diccionario con la carga útil o 'payload' (ej: {"sub": user.email}).
+    - expires_delta: Tiempo de vida opcional para el token. Si no se provee, 
+      utiliza por defecto el valor configurado en ACCESS_TOKEN_EXPIRE_MINUTES.
+    """
+    to_encode = data.copy()
+    
+    # Determinamos el tiempo exacto de expiración (ahora + delta de tiempo)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Inyectamos la fecha de expiración estándar ('exp') dentro del payload del token
+    to_encode.update({"exp": expire})
+    
+    # Codificamos el token usando la clave secreta global y el algoritmo de firma (ej. HS256)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    
+    return encoded_jwt
+
+================================================================================
+ARCHIVO: .\app\core\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\models\base.py
+================================================================================
+
+# Importa aquí todos los modelos para que Alembic los detecte automáticamente
+from app.core.database import Base
+from app.models.user import User
+
+================================================================================
+ARCHIVO: .\app\models\user.py
+================================================================================
+
+"""
+Modelo ORM de la Tabla de Usuarios (SQLAlchemy).
+--------------------------------------------------------------------------------
+Este archivo define la estructura relacional de la entidad 'User' utilizando 
+SQLAlchemy ORM (Object-Relational Mapping). Cada clase aquí mapea directamente 
+una tabla en la base de datos PostgreSQL, permitiendo manipular registros 
+mediante objetos de Python en lugar de escribir consultas SQL manuales.
+"""
+
+from sqlalchemy import Column, Integer, String, Boolean
+from app.core.database import Base
+
+class User(Base):
+    """
+    Clase modelo que representa la tabla física 'users' en la base de datos.
+    Hereda de 'Base' (creada en database.py), lo que le indica a SQLAlchemy 
+    que esta clase es una entidad mapeada y debe ser rastreada por el sistema.
+    """
+    
+    # Nombre exacto de la tabla en la base de datos PostgreSQL
+    __tablename__ = "users"
+
+    # -------------------------------------------------------------------------
+    # Definición de Columnas y Restricciones (Constraints)
+    # -------------------------------------------------------------------------
+    
+    # Identificador único (Primary Key). 'index=True' crea un índice en la BD 
+    # para acelerar las búsquedas basadas en el ID.
+    id = Column(Integer, primary_key=True, index=True)
+    
+    # Correo electrónico del usuario. 
+    # - unique=True: Garantiza que no existan dos usuarios con el mismo email.
+    # - index=True: Mejora drásticamente la velocidad al buscar usuarios por email en los logins.
+    # - nullable=False: Restricción estricta de que el campo es obligatorio.
+    email = Column(String, unique=True, index=True, nullable=False)
+    
+    # Contraseña cifrada (Hash generado por bcrypt). 
+    # Nunca se guarda la contraseña en texto plano por seguridad.
+    hashed_password = Column(String, nullable=False)
+    
+    # Nombre completo del usuario. Es opcional (nullable=True).
+    full_name = Column(String, nullable=True)
+    
+    # Estado de la cuenta. Por defecto inicia en True (activo). 
+    # Permite desactivar usuarios sin necesidad de borrarlos físicamente.
+    is_active = Column(Boolean, default=True)
+    
+    # Indicador de privilegios de administrador (Superusuario).
+    # Por defecto es False, permitiendo restringir rutas críticas solo a admins.
+    is_superuser = Column(Boolean, default=False)
+
+================================================================================
+ARCHIVO: .\app\models\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\schemas\token.py
+================================================================================
+
+from pydantic import BaseModel
+from typing import Optional
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+================================================================================
+ARCHIVO: .\app\schemas\user.py
+================================================================================
+
+"""
+Esquemas de Validación y Serialización de Datos (Pydantic).
+--------------------------------------------------------------------------------
+Este archivo define los esquemas de Pydantic para la entidad 'User'. A diferencia 
+de los modelos ORM (que estructuran cómo se guardan los datos en la base de datos), 
+los esquemas de Pydantic se encargan de validar, serializar y documentar los 
+datos que entran a través de las peticiones HTTP (inputs) y los que salen 
+hacia el cliente (outputs).
+"""
+
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+
+# -------------------------------------------------------------------------
+# 1. Esquema Base (Propiedades Compartidas)
+# -------------------------------------------------------------------------
+class UserBase(BaseModel):
+    """
+    Clase base que agrupa los atributos comunes compartidos entre diferentes 
+    operaciones (creación, actualización y lectura). Utiliza tipos opcionales 
+    para flexibilidad en las estructuras de datos.
+    """
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = True
+    is_superuser: Optional[bool] = False  # Campo para identificar privilegios de administrador
+
+
+# -------------------------------------------------------------------------
+# 2. Esquema de Creación de Usuarios (Datos de Entrada / Request Payload)
+# -------------------------------------------------------------------------
+class UserCreate(UserBase):
+    """
+    Esquema utilizado estrictamente para validar la información enviada por 
+    el cliente al registrar un nuevo usuario mediante una petición POST.
+    Hereda de UserBase pero vuelve obligatorios el correo y la contraseña.
+    """
+    email: EmailStr
+    password: str
+
+    # Configuración moderna de Pydantic V2 para inyectar ejemplos visuales 
+    # directamente en la documentación interactiva de Swagger UI (/docs).
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "nico@example.com",
+                "full_name": "nico",
+                "is_active": True,
+                "password": "1234"
+            }
+        }
+    }
+
+
+# -------------------------------------------------------------------------
+# 3. Esquema de Actualización de Datos (Modificación Parcial)
+# -------------------------------------------------------------------------
+class UserUpdate(UserBase):
+    """
+    Esquema para modificar registros existentes. Permite actualizar opcionalmente 
+    cualquier campo, incluyendo la posibilidad de cambiar el password de forma independiente.
+    """
+    password: Optional[str] = None
+
+
+# -------------------------------------------------------------------------
+# 4. Esquema Base de Datos / Conversión de ORM (from_attributes)
+# -------------------------------------------------------------------------
+class UserInDBBase(UserBase):
+    """
+    Esquema intermedio que incorpora el identificador único (ID) generado por PostgreSQL.
+    'from_attributes = True' (conocido como orm_mode en versiones anteriores de Pydantic) 
+    es la propiedad clave que le permite a Pydantic leer datos directamente desde 
+    los objetos ORM de SQLAlchemy y serializarlos como diccionarios o JSON.
+    """
+    id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+# -------------------------------------------------------------------------
+# 5. Esquema Final de Respuesta (Data Output / Response Model)
+# -------------------------------------------------------------------------
+class User(UserInDBBase):
+    """
+    Esquema final devuelto al cliente en las respuestas HTTP (como al consultar 
+    el perfil /me o listar usuarios). Hereda de UserInDBBase y asegura que nunca 
+    se exponga el campo 'hashed_password' en las respuestas de la API.
+    """
+    pass
+
+================================================================================
+ARCHIVO: .\app\schemas\__init__.py
+================================================================================
+
+
+
+================================================================================
+ARCHIVO: .\app\tests\conftest.py
+================================================================================
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from app.main import app
+from app.core.database import Base, get_db
+from app.models.user import User  # <--- ¡Importante: Necesario para que Base reconozca la tabla users!
+
+# Usamos SQLite en memoria con StaticPool para aislamiento total en tests
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+@pytest.fixture(scope="function")
+def db_session():
+    # Creamos las tablas en la BD en memoria antes de cada test
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        # Destruimos las tablas al finalizar el test
+        Base.metadata.drop_all(bind=engine)
+
+@pytest.fixture(scope="function")
+def client(db_session):
+    # Sobrescribimos la dependencia get_db para usar la sesión de pruebas
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            db_session.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+================================================================================
+ARCHIVO: .\app\tests\test_users.py
+================================================================================
+
+def test_create_user(client):
+    response = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "test@example.com",
+            "password": "securepassword123",
+            "full_name": "Test User",
+            "is_active": True
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "test@example.com"
+    assert "id" in data
+    # Verificamos por seguridad que nunca se devuelva el password hasheado
+    assert "hashed_password" not in data
+
+def test_login_and_access_protected_route(client):
+    # 1. Primero creamos el usuario
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "auth@example.com",
+            "password": "mypassword123",
+            "full_name": "Auth User",
+            "is_active": True
+        },
+    )
+
+    # 2. Hacemos login en el endpoint de acceso (OAuth2 usa form-data, por eso usamos 'data')
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={
+            "username": "auth@example.com",
+            "password": "mypassword123"
+        },
+    )
+    assert response.status_code == 200
+    token_data = response.json()
+    assert "access_token" in token_data
+    assert token_data["token_type"] == "bearer"
+    
+    token = token_data["access_token"]
+
+    # 3. Intentamos acceder a la ruta protegida /me pasando el token JWT en los headers
+    headers = {"Authorization": f"Bearer {token}"}
+    me_response = client.get("/api/v1/users/me", headers=headers)
+    
+    assert me_response.status_code == 200
+    me_data = me_response.json()
+    assert me_data["email"] == "auth@example.com"
+    assert me_data["full_name"] == "Auth User"
+
+================================================================================
+ARCHIVO: .\app\tests\__init__.py
+================================================================================
+
