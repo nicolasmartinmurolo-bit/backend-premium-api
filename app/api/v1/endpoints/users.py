@@ -2,12 +2,20 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db  # Importamos la dependencia centralizada
-from app.core.security import get_password_hash  # Módulo de hashing (Bcrypt)
+from app.core.database import SessionLocal
+from app.core.security import get_password_hash
 from app.models.user import User as UserModel
 from app.schemas.user import User, UserCreate
+from app.api.deps import get_current_user  # <--- Importamos la dependencia protegida
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @router.post("/", response_model=User)
 def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
@@ -19,15 +27,15 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
             detail="El correo electrónico ya está registrado en la base de datos."
         )
     
-    # 2. Instanciar el modelo aplicando hashing seguro a la contraseña
+    # 2. Instanciar el modelo aplicando hashing a la contraseña
     db_user = UserModel(
         email=user_in.email,
-        hashed_password=get_password_hash(user_in.password),  # Hash seguro con Bcrypt
+        hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         is_active=user_in.is_active
     )
     
-    # 3. Guardar en la base de datos con control transaccional seguro
+    # 3. Guardar en la base de datos
     try:
         db.add(db_user)
         db.commit()
@@ -42,3 +50,10 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = db.query(UserModel).offset(skip).limit(limit).all()
     return users
+
+@router.get("/me", response_model=User)
+def read_users_me(current_user: UserModel = Depends(get_current_user)):
+    """
+    Obtiene los datos del usuario actual autenticado mediante el token JWT.
+    """
+    return current_user
